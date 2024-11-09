@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>1일차</title>
+    <!-- 구글 웹 폰트 (예쁜 폰트) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- jquery lib -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <style>
+        /* 전체 글씨에 사용될 폰트 설정 */
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            font-size: 40px;
+    
+    
+        h1, h2 {
+            font-family: 'Roboto', sans-serif;
+        }
+    
+        /* 버튼 스타일 */
+        .btn {
+            font-size: 30px; /* 버튼 글씨 크기 증가 */
+            padding: 30px 50px; /* 패딩을 키워 버튼 크기 증가 */
+            margin: 15px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px; /* 모서리 둥글기 증가 */
+            transition: background-color 0.3s;
+        }
+    
+        .btn:hover {
+            background-color: #45a049;
+        }
+    
+        /* 퀴즈 문제 리스트 스타일 */
+        .quiz ul {
+            list-style-type: none;
+            padding: 0;
+        }
+    
+        .quiz li {
+            font-size: 40px; /* 문제 글씨 크기 증가 */
+            margin: 15px 0; /* 항목 사이 여백 증가 */
+        }
+    
+        /* OX 선택지 스타일 */
+        .ox-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* 선택지 간격 증가 */
+            margin-top: 30px;
+        }
+    
+        .ox-container label {
+            font-size: 35px; /* 선택지 글씨 크기 증가 */
+            cursor: pointer;
+            padding: 25px 45px; /* 선택지 크기 증가 */
+            border-radius: 8px; /* 선택지 모서리 둥글기 증가 */
+            background-color: #f4f4f4;
+            border: 2px solid #000000;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+    
+        .ox-container input[type="radio"] {
+            display: none;
+        }
+    
+        .ox-container input[type="radio"]:checked + label {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+    
+        .ox-container label:hover {
+            background-color: #f0f0f0;
+            border-color: #888;
+        }
+    
+        .ox-container input[type="radio"]:checked + label:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+        }
+    
+        /* 다음 버튼 스타일 */
+        button#nextQuestionBtn {
+            font-size: 22px; /* 글씨 크기 증가 */
+            padding: 15px 30px; /* 패딩 증가 */
+            margin-top: 25px;
+            cursor: pointer;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+    
+        button#nextQuestionBtn:hover {
+            background-color: #007B9C;
+        }
+    
+        /* 전체 레이아웃 설정 */
+        .btnArea {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap; /* 작은 화면에서 버튼들이 줄 바꿈 되도록 */
+        }
+    
+        .btnArea .btn {
+            margin: 15px;
+        }
+    
+        .examList, .quizListDiv {
+            text-align: center;
+            margin-top: 40px;
+        }
+    
+        /* 반응형 디자인을 위한 스타일 */
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px; /* 기본 글씨 크기 조정 */
+            }
+    
+            .btn {
+                font-size: 20px; /* 버튼 글씨 크기 줄이기 */
+                padding: 15px 30px; /* 패딩 줄이기 */
+            }
+    
+            .ox-container label {
+                font-size: 24px; /* 선택지 글씨 크기 줄이기 */
+                padding: 15px 30px; /* 패딩 줄이기 */
+            }
+    
+            button#nextQuestionBtn {
+                font-size: 18px; /* 글씨 크기 줄이기 */
+                padding: 12px 24px; /* 패딩 줄이기 */
+            }
+    
+            .quiz li {
+                font-size: 24px; /* 문제 글씨 크기 줄이기 */
+                margin: 12px 0; /* 항목 사이 여백 줄이기 */
+            }
+        }
+    </style>
+    
+</head>
+<body>
+<div class="btnArea">
+    <button class="btn" id="examShowBtn">단어 공부하기</button>
+    <button class="btn" id="quizStartBtn">퀴즈 시작</button>
+</div>
+<div class="modal-head"> 
+    <h1 class="title">일본어 OX퀴즈</h1>
+</div>
+
+<div class="examList"></div>
+<div class="quizListDiv"></div>
+
+<!-- 정답과 오답에 따라 재생할 오디오 요소 -->
+<audio id="correctSwordSound" src="칼휘두르는3.wav"></audio>
+<audio id="correctDragonSound" src="dragon-hurt-47161.mp3"></audio>
+<audio id="incorrectSound" src="dragon-growl-37570.mp3"></audio>
+<audio id="gameover" src="male_hurt7-48124.mp3"></audio>
+<audio id="gameoverBGM" src="game-over-arcade-6435.mp3"></audio>
+<audio id="gameclear" src="piglevelwin2mp3-14800.mp3"></audio>
+<audio id="gamebgm" src="boss-intro-02-72039.mp3" loop></audio> <!-- loop 속성 추가 -->
+
+<script>
+    alert('나는 대구남산고에 다니고 있는 김남산. 등교하고 있다.')
+    alert('김남산: 아 등교하는거 귀찮아 죽겠네.')
+    alert('김남산: 학교 언제 무너지냐')
+    alert('김남산: 그나저나 학교 주변이 왜이렇게 어수선하지?')
+    alert('드르륵(교실 문을 연다)')
+    alert('선생님: 큰일났어! 김남산!')
+    alert('김남산:네?! 왜그러세요?')
+    alert('선생님: 지금 괴물로부터 학교가 점령당했어!')
+    alert('김남산: 네??')
+    alert('선생님: 빨리 괴물을 무찌르고 학교를 구해줘!!')
+    alert('당신은 괴물을 무찌르기 위해 일본어 문제를 맞혀야 합니다.')
+    alert('문제는 총 10문제이며, 7문제 이상 맞히면 클리어, 4문제를 틀리면 게임오버됩니다.')
+
+    // quizData와 examData 선언
+    let quizData = [
+        {
+            "1일차": [
+                ["わたし는 나를 의미한다", "O"],
+                ["おれ는 그를 의미한다", "X"],
+                ["きみ는 너를 의미한다", "O"],
+                ["あなた는 당신을 의미한다", "O"],
+                ["かれ 그를 의미한다", "O"],
+                ["かのじょ는 그녀를 의미한다", "O"],
+                ["かれら는 그들을 의미한다", "O"],
+                ["ぼくら는 우리를 의미한다", "O"],
+                ["わたくし는 저를 의미한다", "O"],
+                ["わたし는 그들을 의미한다", "X"]
+            ]
+        }
+        // 다른 일차의 퀴즈 데이터 생략...
+    ];
+
+    let examData = [
+        {
+            "1일차": [
+                '-わたし: 나',
+                '-ぼく: 나 (존댓말)',
+                '-おれ: 나 (예삿말)',
+                '-きみ: 너',
+                '-あなた: 당신',
+                '-かれ: 그',
+                '-かのじょ: 그녀',
+                '-れら: 그들',
+                '-ぼくら: 우리',
+                '-わたくし: 저'
+            ]
+        }
+        // 다른 일차의 단어 공부 데이터 생략...
+    ];
+
+    $(function () {
+        let examShowBtn = $('#examShowBtn')
+        let quizStartBtn = $('#quizStartBtn')
+        let examList = $('.examList')
+        let quizListDiv = $('.quizListDiv')
+        let quizDay
+
+        // quizStartDate 값 초기화 및 불러오기 로직 추가
+        if (localStorage.getItem('quizStartDate')) {
+            quizDay = Math.floor((new Date().getTime() - parseInt(localStorage.getItem('quizStartDate'))) / (1000 * 60 * 60 * 24))
+        } else {
+            quizDay = 0
+            let quizStartDate = new Date()
+            localStorage.setItem('quizStartDate', quizStartDate.getTime().toString())
+        }
+
+        examShowBtn.on('click', function () {
+            examList.empty()
+            quizListDiv.empty()
+            quizListDiv.hide()
+            examList.show()
+
+            let printExamData = examData[quizDay][Object.keys(examData[quizDay])[0]]
+            let day = Object.keys(examData[quizDay])[0]
+            let exam = $('<div class="exam"></div>')
+            let dayTitle = $('<h2>' + day + '</h2>')
+            exam.append(dayTitle)
+
+            let examListUl = $('<ul></ul>')
+
+            for (let examItem of printExamData) {
+                examListUl.append(`<li>${examItem}</li>`)
+            }
+            exam.append(examListUl)
+            examList.append(exam)
+        })
+
+        quizStartBtn.on('click', function () {
+            quizListDiv.empty()
+            quizListDiv.show()
+            examList.hide()
+
+            let currentQuestionIndex = 0
+            let correctCount = 0
+            let incorrectCount = 0
+
+            $('#gamebgm')[0].play()
+
+            let quizs = quizData[quizDay][Object.keys(quizData[quizDay])[0]]
+            let day = Object.keys(quizData[quizDay])[0]
+
+            let quiz = $('<div class="quiz"></div>')
+            let dayTitle = $('<h2>' + day + '</h2>')
+            quiz.append(dayTitle)
+            let quizList = $('<ul></ul>')
+
+            if (quizs.length !== 10) {
+                if (quizDay !== 4) {
+                    quizs.sort(() => Math.random() - Math.random())
+                    quizs = quizs.slice(0, 10)
+                }
+            }
+
+            function loadQuestion() {
+                quizList.empty()
+                if (currentQuestionIndex < quizs.length) {
+                    let question = quizs[currentQuestionIndex][0]
+                    let questionNumber = currentQuestionIndex + 1
+                    quizList.append(`
+                        <li>${questionNumber}. ${question}</li>
+                        <div>
+                            <input type="radio" name="answer" value="O"> O
+                            <input type="radio" name="answer" value="X"> X
+                            <button id="nextQuestionBtn">다음</button>
+                        </div>
+                    `)
+                } else {
+                    let resultMessage = `퀴즈가 종료되었습니다!`
+                    if (correctCount >= 7) {
+                        $('#gameclear')[0].play(); // 클리어 시 gameclear 오디오 재생
+                        resultMessage += "\n클리어! 보스를 처치했다!"
+                        $('#gamebgm')[0].pause();
+                        $('#gamebgm')[0].currentTime = 0;
+                    }
+                    resultMessage += `\n맞힌 문제 수: ${correctCount}\n틀린 문제 수: ${incorrectCount}`
+                    alert(resultMessage)
+                    quizListDiv.empty()
+
+                    $('#gamebgm')[0].pause()
+                    $('#gamebgm')[0].currentTime = 0
+                }
+            }
+
+            loadQuestion()
+            quiz.append(quizList)
+            quizListDiv.append(quiz)
+
+            $(document).off('click', '#nextQuestionBtn').on('click', '#nextQuestionBtn', function () {
+                let selectedAnswer = $('input[name="answer"]:checked').val()
+                let correctAnswer = quizs[currentQuestionIndex][1]
+
+                if (!selectedAnswer) {
+                    alert("답을 선택해주세요!")
+                    return
+                }
+
+                if (selectedAnswer === correctAnswer) {
+                    if (currentQuestionIndex !== 9) {
+                        $('#correctSwordSound')[0].play();
+                        setTimeout(function() {
+                            $('#correctDragonSound')[0].play();
+                        }, 3000);
+                    }
+                    alert("문제를 맞혔다! 괴물 hp-100")
+                    correctCount++
+                } else {
+                    if (incorrectCount < 4) {
+                        $('#incorrectSound')[0].play()
+                    }
+                    if (currentQuestionIndex !== 9) {
+                        $('#incorrectSound')[0].play();
+                    }
+                    alert("문제를 틀렸다! 플레이어 hp-100")
+                    incorrectCount++
+                }
+
+                if (incorrectCount >= 4) {
+                    $('#gameover')[0].play();
+                    $('#gameover')[0].addEventListener('ended', function() {
+                        $('#gameoverBGM')[0].play();
+                    });
+                    alert("윽! 내 몸이 왜이러지..")
+                    alert("게임 오버! 다시 시도하세요.")
+                    quizListDiv.empty()
+
+                    $('#gamebgm')[0].pause()
+                    $('#gamebgm')[0].currentTime = 0
+                    return
+                }
+
+                currentQuestionIndex++
+                loadQuestion()
+            })
+        })
+    })
+</script>
+</body>
+</html>
